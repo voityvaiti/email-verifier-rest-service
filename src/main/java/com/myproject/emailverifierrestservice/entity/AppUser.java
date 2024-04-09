@@ -1,6 +1,8 @@
 package com.myproject.emailverifierrestservice.entity;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.myproject.emailverifierrestservice.validation.annotation.EmailConstraints;
+import com.myproject.emailverifierrestservice.validation.annotation.PasswordConstraints;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
@@ -25,9 +27,11 @@ public class AppUser {
     private UUID id;
 
     @Column(name = "email", unique = true)
+    @EmailConstraints
     private String email;
 
     @Column(name = "password")
+    @PasswordConstraints
     @ToString.Exclude
     @JsonIgnore
     private String password;
