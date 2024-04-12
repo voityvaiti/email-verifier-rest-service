@@ -4,6 +4,7 @@ import com.myproject.emailverifierrestservice.dto.AuthRequestDto;
 import com.myproject.emailverifierrestservice.dto.JwtTokenResponseDto;
 import com.myproject.emailverifierrestservice.dto.PasswordChangeRequestDto;
 import com.myproject.emailverifierrestservice.entity.AppUser;
+import com.myproject.emailverifierrestservice.entity.EmailVerificationToken;
 import com.myproject.emailverifierrestservice.entity.PasswordResetToken;
 import com.myproject.emailverifierrestservice.service.abstraction.AuthService;
 import com.myproject.emailverifierrestservice.service.abstraction.EmailService;
@@ -15,7 +16,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.UUID;
 
 @RestController
 @RequestMapping("${api-prefix}/auth")
@@ -32,40 +32,45 @@ public class AuthController {
     @PostMapping("/login")
     public ResponseEntity<JwtTokenResponseDto> logIn(@RequestBody @Valid AuthRequestDto authRequestDto) {
 
-        String token = authService.generateTokenByCredentials(authRequestDto.getEmail(), authRequestDto.getPassword());
+        String token = authService.generateAuthTokenByCredentials(authRequestDto.getEmail(), authRequestDto.getPassword());
 
         return ResponseEntity.ok(new JwtTokenResponseDto(token));
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@RequestBody @Valid AuthRequestDto authRequestDto)  {
+    public ResponseEntity<Void> signUp(@RequestBody @Valid AuthRequestDto authRequestDto) {
 
         AppUser createdUser = authService.registerNewUser(authRequestDto);
 
-        emailService.sendEmailVerification(createdUser.getId(), createdUser.getEmail());
+        emailService.sendEmailVerification(createdUser.getEmail(), authService.generateEmailVerificationToken(createdUser));
 
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
     @GetMapping("/resend/email-confirmation/{email}")
-    public ResponseEntity<Void> resendEmailConfirmation(@PathVariable("email") String email)  {
+    public ResponseEntity<Void> resendEmailConfirmation(@PathVariable("email") String email) {
 
         AppUser user = userService.getByEmail(email);
 
-        emailService.sendEmailVerification(user.getId(), user.getEmail());
+        emailService.sendEmailVerification(user.getEmail(), authService.generateEmailVerificationToken(user));
 
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/email-confirm/{token}")
-    public ResponseEntity<Void> confirmEmail(@PathVariable("token") String id)  {
+    public ResponseEntity<Void> confirmEmail(@PathVariable("token") String token) {
 
-        userService.enableUser(UUID.fromString(id));
+        authService.validateEmailVerificationToken(token);
+        EmailVerificationToken emailVerificationToken = userService.getEmailVerificationToken(token);
+
+        userService.enableUser(emailVerificationToken.getUser().getId());
+
+        userService.deleteEmailVerificationToken(emailVerificationToken.getId());
         return ResponseEntity.ok().build();
     }
 
     @GetMapping("/send/reset-password-email/{email}")
-    public ResponseEntity<Void> sendPasswordReset(@PathVariable("email") String email)  {
+    public ResponseEntity<Void> sendPasswordReset(@PathVariable("email") String email) {
 
         AppUser user = userService.getByEmail(email);
 
@@ -78,10 +83,8 @@ public class AuthController {
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(@RequestBody @Valid PasswordChangeRequestDto passwordChangeRequestDto) {
 
-        if(!authService.validatePasswordResetToken(passwordChangeRequestDto.getVerificationToken())) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        PasswordResetToken passwordResetToken = authService.getPasswordResetTokenByToken(passwordChangeRequestDto.getVerificationToken());
+        authService.validatePasswordResetToken(passwordChangeRequestDto.getVerificationToken());
+        PasswordResetToken passwordResetToken = userService.getPasswordResetToken(passwordChangeRequestDto.getVerificationToken());
 
         userService.updatePassword(passwordResetToken.getUser().getId(), passwordChangeRequestDto.getNewPassword());
 
