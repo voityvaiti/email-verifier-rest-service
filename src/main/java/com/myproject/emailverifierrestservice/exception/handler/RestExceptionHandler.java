@@ -1,8 +1,9 @@
 package com.myproject.emailverifierrestservice.exception.handler;
 
 import com.myproject.emailverifierrestservice.dto.ErrorDetailsDto;
-import com.myproject.emailverifierrestservice.exception.InvalidPasswordResetTokenException;
+import com.myproject.emailverifierrestservice.exception.InvalidVerificationTokenException;
 import com.myproject.emailverifierrestservice.exception.ResourceNotFoundException;
+import lombok.extern.log4j.Log4j2;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -14,10 +15,13 @@ import java.time.LocalDateTime;
 import java.util.stream.Collectors;
 
 @RestControllerAdvice
+@Log4j2
 public class RestExceptionHandler {
 
     @ExceptionHandler({MethodArgumentNotValidException.class})
     public ResponseEntity<ErrorDetailsDto> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+
+        log.warn("MethodArgumentNotValidException caught: {}", ex.getMessage());
 
         String message = ex.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(" "));
 
@@ -27,17 +31,23 @@ public class RestExceptionHandler {
     @ExceptionHandler({ResourceNotFoundException.class})
     public ResponseEntity<ErrorDetailsDto> handleResourceNotFound(ResourceNotFoundException ex) {
 
+        log.warn("ResourceNotFoundException caught: {}", ex.getMessage());
+
         return new ResponseEntity<>(new ErrorDetailsDto(LocalDateTime.now(), ex.getMessage()), HttpStatus.NOT_FOUND);
     }
 
-    @ExceptionHandler({InvalidPasswordResetTokenException.class})
-    public ResponseEntity<ErrorDetailsDto> handleInvalidPasswordResetToken() {
+    @ExceptionHandler({InvalidVerificationTokenException.class})
+    public ResponseEntity<ErrorDetailsDto> handleInvalidVerificationToken(InvalidVerificationTokenException e) {
 
-        return new ResponseEntity<>(new ErrorDetailsDto(LocalDateTime.now(), "Password reset token is invalid."), HttpStatus.BAD_REQUEST);
+        log.warn("InvalidVerificationTokenException caught");
+
+        return new ResponseEntity<>(new ErrorDetailsDto(LocalDateTime.now(), e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorDetailsDto> handleOtherExceptions() {
+    public ResponseEntity<ErrorDetailsDto> handleOtherExceptions(RuntimeException e) {
+
+        log.error("Unknown RuntimeException caught: {}", e.toString());
 
         return new ResponseEntity<>(new ErrorDetailsDto(LocalDateTime.now(), "Something went wrong."), HttpStatus.INTERNAL_SERVER_ERROR);
     }
