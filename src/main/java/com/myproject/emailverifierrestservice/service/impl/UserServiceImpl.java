@@ -1,7 +1,10 @@
 package com.myproject.emailverifierrestservice.service.impl;
 
 import com.myproject.emailverifierrestservice.entity.AppUser;
+import com.myproject.emailverifierrestservice.entity.EmailVerificationToken;
+import com.myproject.emailverifierrestservice.entity.PasswordResetToken;
 import com.myproject.emailverifierrestservice.exception.ResourceNotFoundException;
+import com.myproject.emailverifierrestservice.repository.EmailVerificationTokenRepository;
 import com.myproject.emailverifierrestservice.repository.PasswordResetTokenRepository;
 import com.myproject.emailverifierrestservice.repository.UserRepository;
 import com.myproject.emailverifierrestservice.service.abstraction.UserService;
@@ -22,6 +25,7 @@ public class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
 
     private final PasswordEncoder passwordEncoder;
 
@@ -41,6 +45,19 @@ public class UserServiceImpl implements UserService {
 
         return userRepository.findByEmail(email).orElseThrow(() -> new ResourceNotFoundException("User not found with email: " + email));
     }
+
+
+    @Override
+    public EmailVerificationToken getEmailVerificationToken(String token) {
+        return emailVerificationTokenRepository.findByToken(token).orElseThrow(() -> new ResourceNotFoundException("Email verification token not found."));
+    }
+
+
+    @Override
+    public PasswordResetToken getPasswordResetToken(String token) {
+        return passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new ResourceNotFoundException("Password reset token not found."));
+    }
+
 
     @Override
     public AppUser updatePassword(UUID id, String password) {
@@ -64,6 +81,15 @@ public class UserServiceImpl implements UserService {
             user.setEnabled(true);
             userRepository.save(user);
         }
+    }
+
+
+    @Override
+    public void deleteEmailVerificationToken(UUID id) {
+
+        log.debug("Removing EmailVerificationToken with ID: {}", id);
+
+        emailVerificationTokenRepository.deleteById(id);
     }
 
     @Override

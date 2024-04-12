@@ -8,7 +8,6 @@ import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 
 @Service
 @Log4j2
@@ -27,14 +26,14 @@ public class EmailServiceImpl implements EmailService {
 
 
     @Override
-    public void sendEmailVerification(UUID id, String email) {
+    public void sendEmailVerification(String email, String token) {
 
         log.debug("Sending email verification on email: {}", email);
 
         String emailConfirmationLink = serverHost +
                 apiPrefix +
                 "/auth/email-confirm/" +
-                id;
+                token;
 
         sendMessage(email, "Email verification.", emailConfirmationLink);
     }

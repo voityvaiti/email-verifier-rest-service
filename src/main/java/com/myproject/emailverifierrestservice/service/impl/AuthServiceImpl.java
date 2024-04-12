@@ -2,10 +2,11 @@ package com.myproject.emailverifierrestservice.service.impl;
 
 import com.myproject.emailverifierrestservice.dto.AuthRequestDto;
 import com.myproject.emailverifierrestservice.entity.AppUser;
+import com.myproject.emailverifierrestservice.entity.EmailVerificationToken;
 import com.myproject.emailverifierrestservice.entity.PasswordResetToken;
 import com.myproject.emailverifierrestservice.entity.Role;
-import com.myproject.emailverifierrestservice.exception.InvalidPasswordResetTokenException;
-import com.myproject.emailverifierrestservice.exception.ResourceNotFoundException;
+import com.myproject.emailverifierrestservice.exception.InvalidVerificationTokenException;
+import com.myproject.emailverifierrestservice.repository.EmailVerificationTokenRepository;
 import com.myproject.emailverifierrestservice.repository.PasswordResetTokenRepository;
 import com.myproject.emailverifierrestservice.repository.UserRepository;
 import com.myproject.emailverifierrestservice.security.jwt.JwtTokenUtil;
@@ -34,11 +35,24 @@ public class AuthServiceImpl implements AuthService {
 
     private final UserRepository userRepository;
     private final PasswordResetTokenRepository passwordResetTokenRepository;
+    private final EmailVerificationTokenRepository emailVerificationTokenRepository;
 
     private final JwtTokenUtil jwtTokenUtil;
     private final AuthenticationManager authenticationManager;
     private final PasswordEncoder passwordEncoder;
 
+
+    @Override
+    public boolean validateEmailVerificationToken(String token) {
+
+        Optional<EmailVerificationToken> optionalEmailVerificationToken = emailVerificationTokenRepository.findByToken(token);
+
+        log.debug("Validating email verification token: {}", token);
+
+        return optionalEmailVerificationToken.map(
+                        emailVerificationToken -> emailVerificationToken.getExpiryDateTime().isAfter(LocalDateTime.now()))
+                .orElseThrow(() -> new InvalidVerificationTokenException("Email verification token is invalid."));
+    }
 
     @Override
     public boolean validatePasswordResetToken(String token) {
@@ -49,11 +63,12 @@ public class AuthServiceImpl implements AuthService {
 
         return optionalPasswordResetToken.map(
                         passwordResetToken -> passwordResetToken.getExpiryDateTime().isAfter(LocalDateTime.now()))
-                .orElseThrow(InvalidPasswordResetTokenException::new);
+                .orElseThrow(() -> new InvalidVerificationTokenException("Password reset token is invalid."));
     }
 
+
     @Override
-    public String generateTokenByCredentials(String username, String password) {
+    public String generateAuthTokenByCredentials(String username, String password) {
 
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(username, password));
 
@@ -63,6 +78,31 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
+    public String generateEmailVerificationToken(AppUser user) {
+
+        log.debug("Generating email verification token for User: {}", user);
+
+        Optional<EmailVerificationToken> optionalEmailVerificationToken = emailVerificationTokenRepository.findByUserId(user.getId());
+
+        if (optionalEmailVerificationToken.isPresent()) {
+            log.info("Email verification token for User {} is already exists and being refreshed." , user);
+
+            EmailVerificationToken emailVerificationToken = optionalEmailVerificationToken.get();
+            emailVerificationToken.refresh();
+
+            return emailVerificationTokenRepository.save(emailVerificationToken).getToken();
+
+        } else {
+
+            EmailVerificationToken emailVerificationToken = emailVerificationTokenRepository.save(new EmailVerificationToken(user));
+
+            log.info("Email verification token is created for User: {}", user);
+            return emailVerificationToken.getToken();
+        }
+    }
+
+
+    @Override
     public String generatePasswordResetToken(AppUser user) {
 
         log.debug("Generating password reset token for User: {}", user);
@@ -70,7 +110,6 @@ public class AuthServiceImpl implements AuthService {
         Optional<PasswordResetToken> optionalPasswordResetToken = passwordResetTokenRepository.findByUserId(user.getId());
 
         if (optionalPasswordResetToken.isPresent()) {
-
             log.info("Password reset token for User {} is already exists and being refreshed." , user);
 
             PasswordResetToken passwordResetToken = optionalPasswordResetToken.get();
@@ -83,15 +122,10 @@ public class AuthServiceImpl implements AuthService {
             PasswordResetToken passwordResetToken = passwordResetTokenRepository.save(new PasswordResetToken(user));
 
             log.info("Password reset token is created for User: {}", user);
-
             return passwordResetToken.getToken();
         }
     }
 
-    @Override
-    public PasswordResetToken getPasswordResetTokenByToken(String token) {
-        return passwordResetTokenRepository.findByToken(token).orElseThrow(() -> new ResourceNotFoundException("Token not found."));
-    }
 
     @Override
     public AppUser registerNewUser(AuthRequestDto authRequestDto) {
