@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/email_verifier_db_qa
+    username: qa
+    password: qa123
+
+  mail:
+    host: host-qa
+    username: api-qa
+    password: qa-password
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          port: 587
+          starttls:
+            enable: true
+
+springdoc:
+  api-docs:
+    path: /api-docs-qa
+  swagger-ui:
+    path: /swagger-ui-qa
+
+jwt:
+  secret: qa-secret
+  lifetime: 15m
+
+cors:
+  allowed-origin: *
+
+server-host: qa.com
+api-prefix: /api
+
+email-from-address: mail@qa.com

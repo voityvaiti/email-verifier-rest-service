@@ -1,0 +1,37 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/email_verifier_db_prod
+    username: prod
+    password: prod123
+
+  mail:
+    host: host-prod
+    username: api-prod
+    password: prod-password
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          port: 587
+          starttls:
+            enable: true
+
+
+springdoc:
+  api-docs:
+    path: /api-docs-prod
+  swagger-ui:
+    path: /swagger-ui-prod
+
+jwt:
+  secret: prod-secret
+  lifetime: 15m
+
+cors:
+  allowed-origin: ""
+
+server-host: prod.com
+api-prefix: /api
+
+email-from-address: mail@prod.com

@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/email_verifier_db
+    username: postgres
+    password: qwerty123
+
+  mail:
+    host: live.smtp.mailtrap.io
+    username: api
+    password: b8c2150204f34a7cfae83a1bb84ed8dd
+    properties:
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          port: 587
+          starttls:
+            enable: true
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui
+
+jwt:
+  secret: rWkhapFT7F40dzyLIrH01XljpPg4fqsmDjB1TA3if76A0zsYBFTwDouw4NPx
+  lifetime: 15m
+
+cors:
+  allowed-origin: "*"
+
+server-host: localhost:8080
+api-prefix: /api
+
+email-from-address: mailtrap@demomailtrap.com
