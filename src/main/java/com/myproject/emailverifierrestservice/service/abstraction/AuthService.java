@@ -6,9 +6,9 @@ import com.myproject.emailverifierrestservice.entity.AppUser;
 
 public interface AuthService {
 
-    boolean validateEmailVerificationToken(String token);
+    void validateEmailVerificationToken(String token);
 
-    boolean validatePasswordResetToken(String token);
+    void validatePasswordResetToken(String token);
 
     String generateAuthTokenByCredentials(String username, String password);
 

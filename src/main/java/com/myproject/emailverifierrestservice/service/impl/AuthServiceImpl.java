@@ -43,27 +43,29 @@ public class AuthServiceImpl implements AuthService {
 
 
     @Override
-    public boolean validateEmailVerificationToken(String token) {
+    public void validateEmailVerificationToken(String token) {
 
         Optional<EmailVerificationToken> optionalEmailVerificationToken = emailVerificationTokenRepository.findByToken(token);
 
         log.debug("Validating email verification token: {}", token);
 
-        return optionalEmailVerificationToken.map(
-                        emailVerificationToken -> emailVerificationToken.getExpiryDateTime().isAfter(LocalDateTime.now()))
-                .orElseThrow(() -> new InvalidVerificationTokenException("Email verification token is invalid."));
+        if (optionalEmailVerificationToken.isEmpty() ||
+                optionalEmailVerificationToken.get().getExpiryDateTime().isBefore(LocalDateTime.now())) {
+            throw new InvalidVerificationTokenException("Email verification token is invalid.");
+        }
     }
 
     @Override
-    public boolean validatePasswordResetToken(String token) {
+    public void validatePasswordResetToken(String token) {
 
         Optional<PasswordResetToken> optionalPasswordResetToken = passwordResetTokenRepository.findByToken(token);
 
         log.debug("Validating reset password token: {}", token);
 
-        return optionalPasswordResetToken.map(
-                        passwordResetToken -> passwordResetToken.getExpiryDateTime().isAfter(LocalDateTime.now()))
-                .orElseThrow(() -> new InvalidVerificationTokenException("Password reset token is invalid."));
+        if (optionalPasswordResetToken.isEmpty() ||
+                optionalPasswordResetToken.get().getExpiryDateTime().isBefore(LocalDateTime.now())) {
+            throw new InvalidVerificationTokenException("Password reset token is invalid.");
+        }
     }
 
 
