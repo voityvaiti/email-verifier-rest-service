@@ -7,7 +7,6 @@ import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -31,9 +30,6 @@ public class UserController {
     @GetMapping("/current-user")
     public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication) {
 
-        if (authentication == null) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
         AppUser appUser = userService.getByEmail(authentication.getName());
 
         return ResponseEntity.ok(modelMapper.map(appUser, UserResponseDto.class));
