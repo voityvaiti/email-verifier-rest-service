@@ -44,12 +44,4 @@ public class RestExceptionHandler {
         return new ResponseEntity<>(new ErrorDetailsDto(LocalDateTime.now(), e.getMessage()), HttpStatus.BAD_REQUEST);
     }
 
-    @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ErrorDetailsDto> handleOtherExceptions(RuntimeException e) {
-
-        log.error("Unknown RuntimeException caught: {}", e.toString());
-
-        return new ResponseEntity<>(new ErrorDetailsDto(LocalDateTime.now(), "Something went wrong."), HttpStatus.INTERNAL_SERVER_ERROR);
-    }
-
 }
