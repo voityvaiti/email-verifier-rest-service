@@ -38,7 +38,7 @@ class EmailServiceImplTest {
     }
 
     @Test
-    public void sendEmailVerification_ShouldSendEmailWithCorrectContent() {
+    void sendEmailVerification_ShouldSendEmailWithCorrectContent() {
 
         String email = "user@example.com";
         String token = "verificationToken";
@@ -59,7 +59,7 @@ class EmailServiceImplTest {
     }
 
     @Test
-    public void sendPasswordResetToken_ShouldSendEmailWithCorrectContent() {
+    void sendPasswordResetToken_ShouldSendEmailWithCorrectContent() {
 
         String email = "user@example.com";
         String token = "resetToken";

@@ -48,7 +48,7 @@ class UserServiceImplTest {
 
 
     @Test
-    public void getAllTest() {
+    void getAllTest() {
 
         Pageable pageable = Pageable.unpaged();
         Page<AppUser> mockPage = mock(Page.class);
@@ -62,7 +62,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getByEmail_shouldReturnUser_ifUserWasFound() {
+    void getByEmail_shouldReturnUser_ifUserWasFound() {
 
         AppUser mockUser = new AppUser();
         mockUser.setEmail(email);
@@ -76,7 +76,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getByEmail_shouldThrowException_ifUserWasNotFound() {
+    void getByEmail_shouldThrowException_ifUserWasNotFound() {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -87,7 +87,7 @@ class UserServiceImplTest {
 
 
     @Test
-    public void getEmailVerificationToken_shouldReturnToken_ifTokenWasFound() {
+    void getEmailVerificationToken_shouldReturnToken_ifTokenWasFound() {
 
         EmailVerificationToken mockToken = new EmailVerificationToken();
         when(emailVerificationTokenRepository.findByToken(token)).thenReturn(Optional.of(mockToken));
@@ -100,7 +100,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getEmailVerificationToken_shouldThrowException_ifTokenWasNotFound() {
+    void getEmailVerificationToken_shouldThrowException_ifTokenWasNotFound() {
 
         when(emailVerificationTokenRepository.findByToken(token)).thenReturn(Optional.empty());
 
@@ -110,7 +110,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getPasswordResetToken_shouldReturnToken_ifTokenWasFound() {
+    void getPasswordResetToken_shouldReturnToken_ifTokenWasFound() {
 
         PasswordResetToken mockToken = new PasswordResetToken();
         when(passwordResetTokenRepository.findByToken(token)).thenReturn(Optional.of(mockToken));
@@ -123,7 +123,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void getPasswordResetToken_shouldThrowException_ifTokenWasNotFound() {
+    void getPasswordResetToken_shouldThrowException_ifTokenWasNotFound() {
 
         when(passwordResetTokenRepository.findByToken(token)).thenReturn(Optional.empty());
 
@@ -133,7 +133,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void updatePassword_shouldProperlyUpdatePassword() {
+    void updatePassword_shouldProperlyUpdatePassword() {
 
         String newPassword = "newPassword";
         AppUser mockUser = new AppUser();
@@ -157,7 +157,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void enableUser_shouldEnableUser_ifUserIsDisabled() {
+    void enableUser_shouldEnableUser_ifUserIsDisabled() {
 
         AppUser mockUser = new AppUser();
         mockUser.setId(id);
@@ -173,7 +173,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void enableUser_shouldDoNothing_whenUserIsAlreadyEnabled() {
+    void enableUser_shouldDoNothing_whenUserIsAlreadyEnabled() {
 
         AppUser mockUser = new AppUser();
         mockUser.setId(id);
@@ -187,7 +187,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void deleteEmailVerificationToken_shouldDeleteToken() {
+    void deleteEmailVerificationToken_shouldDeleteToken() {
 
         userService.deleteEmailVerificationToken(id);
 
@@ -195,7 +195,7 @@ class UserServiceImplTest {
     }
 
     @Test
-    public void deletePasswordResetToken_shouldDeleteToken() {
+    void deletePasswordResetToken_shouldDeleteToken() {
 
         userService.deletePasswordResetToken(id);
 
