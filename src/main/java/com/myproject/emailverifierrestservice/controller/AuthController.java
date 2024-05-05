@@ -58,7 +58,7 @@ public class AuthController {
     }
 
     @GetMapping("/email-confirm/{token}")
-    public ResponseEntity<Void> confirmEmail(@PathVariable("token") String token) {
+    public ResponseEntity<String> confirmEmail(@PathVariable("token") String token) {
 
         authService.validateEmailVerificationToken(token);
         EmailVerificationToken emailVerificationToken = userService.getEmailVerificationToken(token);
@@ -66,7 +66,8 @@ public class AuthController {
         userService.enableUser(emailVerificationToken.getUser().getId());
 
         userService.deleteEmailVerificationToken(emailVerificationToken.getId());
-        return ResponseEntity.ok().build();
+
+        return ResponseEntity.ok("Email successfully verified.");
     }
 
     @GetMapping("/send/reset-password-email/{email}")
