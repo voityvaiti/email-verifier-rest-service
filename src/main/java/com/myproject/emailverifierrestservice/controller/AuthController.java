@@ -9,6 +9,8 @@ import com.myproject.emailverifierrestservice.entity.PasswordResetToken;
 import com.myproject.emailverifierrestservice.service.abstraction.AuthService;
 import com.myproject.emailverifierrestservice.service.abstraction.EmailService;
 import com.myproject.emailverifierrestservice.service.abstraction.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -21,6 +23,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("${api-prefix}/auth")
 @PreAuthorize("permitAll()")
 @RequiredArgsConstructor
+@Tag(name = "Authentication")
 public class AuthController {
 
     private final AuthService authService;
@@ -29,6 +32,7 @@ public class AuthController {
     private final EmailService emailService;
 
 
+    @Operation(summary = "Log In", description = "Returns authentication token")
     @PostMapping("/login")
     public ResponseEntity<JwtTokenResponseDto> logIn(@RequestBody @Valid AuthRequestDto authRequestDto) {
 
@@ -37,6 +41,7 @@ public class AuthController {
         return ResponseEntity.ok(new JwtTokenResponseDto(token));
     }
 
+    @Operation(summary = "Sign Up", description = "Registers a new user and sends email verification")
     @PostMapping("/signup")
     public ResponseEntity<Void> signUp(@RequestBody @Valid AuthRequestDto authRequestDto) {
 
@@ -47,6 +52,7 @@ public class AuthController {
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
+    @Operation(summary = "Resend email confirmation", description = "Resends the email confirmation link")
     @GetMapping("/resend/email-confirmation/{email}")
     public ResponseEntity<Void> resendEmailConfirmation(@PathVariable("email") String email) {
 
@@ -57,6 +63,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Confirm email", description = "Confirms the email address using the provided token")
     @GetMapping("/email-confirm/{token}")
     public ResponseEntity<String> confirmEmail(@PathVariable("token") String token) {
 
@@ -70,6 +77,7 @@ public class AuthController {
         return ResponseEntity.ok("Email successfully verified.");
     }
 
+    @Operation(summary = "Send email of password reset", description = "Sends an email with token to reset the password")
     @GetMapping("/send/reset-password-email/{email}")
     public ResponseEntity<Void> sendPasswordReset(@PathVariable("email") String email) {
 
@@ -81,6 +89,7 @@ public class AuthController {
         return ResponseEntity.ok().build();
     }
 
+    @Operation(summary = "Update password", description = "Updates the password of user using provided password reset token")
     @PostMapping("/change-password")
     public ResponseEntity<Void> changePassword(@RequestBody @Valid PasswordChangeRequestDto passwordChangeRequestDto) {
 
