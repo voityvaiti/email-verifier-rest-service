@@ -3,6 +3,8 @@ package com.myproject.emailverifierrestservice.controller;
 import com.myproject.emailverifierrestservice.dto.UserResponseDto;
 import com.myproject.emailverifierrestservice.entity.AppUser;
 import com.myproject.emailverifierrestservice.service.abstraction.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.modelmapper.ModelMapper;
 import org.springframework.data.domain.Page;
@@ -20,6 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("${api-prefix}/user")
 @PreAuthorize("isAuthenticated()")
 @RequiredArgsConstructor
+@Tag(name = "User")
 public class UserController {
 
     private static final ModelMapper modelMapper = new ModelMapper();
@@ -27,6 +30,7 @@ public class UserController {
     private final UserService userService;
 
 
+    @Operation(summary = "Get current user", description = "Retrieves information about the currently authenticated user")
     @GetMapping("/current-user")
     public ResponseEntity<UserResponseDto> getCurrentUser(Authentication authentication) {
 
@@ -35,6 +39,7 @@ public class UserController {
         return ResponseEntity.ok(modelMapper.map(appUser, UserResponseDto.class));
     }
 
+    @Operation(summary = "Get user page", description = "Retrieves a paginated list of users")
     @GetMapping("/all")
     @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Page<UserResponseDto>> getUserPage(@RequestParam(defaultValue = "0", name = "page-number") Integer pageNumber,
