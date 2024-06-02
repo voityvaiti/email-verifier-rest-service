@@ -10,6 +10,8 @@ import java.util.UUID;
 
 public interface UserService {
 
+    boolean existsWithEmail(String email);
+
     Page<AppUser> getAll(Pageable pageable);
 
     AppUser getByEmail(String email);
