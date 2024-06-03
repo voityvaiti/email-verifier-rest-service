@@ -3,10 +3,12 @@ package com.myproject.emailverifierrestservice.exception.handler;
 import com.myproject.emailverifierrestservice.dto.ErrorDetailsDto;
 import com.myproject.emailverifierrestservice.exception.InvalidVerificationTokenException;
 import com.myproject.emailverifierrestservice.exception.ResourceNotFoundException;
+import com.myproject.emailverifierrestservice.exception.UserDuplicationException;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -18,10 +20,10 @@ import java.util.stream.Collectors;
 @Log4j2
 public class RestExceptionHandler {
 
-    @ExceptionHandler({MethodArgumentNotValidException.class})
-    public ResponseEntity<ErrorDetailsDto> handleMethodArgumentNotValid(MethodArgumentNotValidException ex) {
+    @ExceptionHandler({MethodArgumentNotValidException.class, UserDuplicationException.class})
+    public ResponseEntity<ErrorDetailsDto> handleValidationException(BindException ex) {
 
-        log.warn("MethodArgumentNotValidException caught: {}", ex.getMessage());
+        log.warn("Validation exception caught: {}", ex.getMessage());
 
         String message = ex.getFieldErrors().stream().map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(" "));
 
