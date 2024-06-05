@@ -6,13 +6,16 @@ import com.myproject.emailverifierrestservice.dto.PasswordChangeRequestDto;
 import com.myproject.emailverifierrestservice.entity.AppUser;
 import com.myproject.emailverifierrestservice.entity.EmailVerificationToken;
 import com.myproject.emailverifierrestservice.entity.PasswordResetToken;
+import com.myproject.emailverifierrestservice.exception.UserDuplicationException;
 import com.myproject.emailverifierrestservice.service.abstraction.AuthService;
 import com.myproject.emailverifierrestservice.service.abstraction.EmailService;
 import com.myproject.emailverifierrestservice.service.abstraction.UserService;
+import com.myproject.emailverifierrestservice.validation.validator.UserUniquenessValidator;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -26,10 +29,16 @@ import org.springframework.web.bind.annotation.*;
 @Tag(name = "Authentication")
 public class AuthController {
 
+    private static final ModelMapper modelMapper = new ModelMapper();
+
+
     private final AuthService authService;
     private final UserService userService;
 
     private final EmailService emailService;
+
+    private final UserUniquenessValidator userUniquenessValidator;
+
 
 
     @Operation(summary = "Log In", description = "Returns authentication token")
@@ -43,12 +52,13 @@ public class AuthController {
 
     @Operation(summary = "Sign Up", description = "Registers a new user and sends email verification")
     @PostMapping("/signup")
-    public ResponseEntity<Void> signUp(@RequestBody @Valid AuthRequestDto authRequestDto) {
+    public ResponseEntity<Void> signUp(@RequestBody @Valid AuthRequestDto authRequestDto) throws UserDuplicationException {
+
+        userUniquenessValidator.validate(modelMapper.map(authRequestDto, AppUser.class));
 
         AppUser createdUser = authService.registerNewUser(authRequestDto);
 
         emailService.sendEmailVerification(createdUser.getEmail(), authService.generateEmailVerificationToken(createdUser));
-
         return new ResponseEntity<>(HttpStatus.CREATED);
     }
 
